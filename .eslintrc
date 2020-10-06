@@ -1,0 +1,26 @@
+{
+  "extends": [
+    "plugin:vue/recommended"
+  ],
+  "overrides": [{
+    "files": ["*.vue", "*.js"],
+    "rules": {
+      "indent": ["error", 2, {
+        "SwitchCase": 1
+      }],
+      "max-len": ["warn", 120, {
+        "ignoreUrls": true,
+        "ignoreComments": false,
+        "ignoreRegExpLiterals": true,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true
+      }],
+      "vue/max-attributes-per-line": ["warn", {
+        "singleline": 3
+      }],
+      "vue/html-indent": ["error", 2],
+      "semi": ["error", "always"],
+      "quotes": ["error", "single"]
+    }
+  }]
+}

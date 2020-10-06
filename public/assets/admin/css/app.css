@@ -1,0 +1,13 @@
+.flex {
+  display: -webkit-box;
+  display: flex;
+}
+
+.custom-flex {
+  display: -webkit-box;
+  display: flex;
+  flex-wrap: wrap;
+  -webkit-box-pack: justify;
+          justify-content: space-between;
+}
+

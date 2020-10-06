@@ -1,0 +1,615 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svidget="http://www.svidget.org/svidget"
+		 width="400" height="400" viewBox="0 0 400 400" style="background:transparent" svidget:version="0.3.0">
+	<title>Donut Chart</title>
+
+
+	<svidget:params>
+		<!-- data params -->
+		<svidget:param name="data" shortname="d" type="array" coerce="true" group="data" description="An array of name, value arrays. Example: [['Steelers', 0.14], ['Broncos', 0.38], ['Colts', 0.21], ['Raiders', 0.06]]. Note that the values do not need to sum to 1 or 100. The widget will auto sum the values to construct percentages." onset="handleDataParamSet" />
+		<svidget:param name="maxSlices" shortname="max" type="number" subtype="integer" coerce="true" group="data" description="The max number of slices to allow. If there are more data for slices, the lowest valued slices will be grouped together as one slice. Default is unlimited." onset="handleDataParamSet" />
+		<svidget:param name="startAngle" shortname="angle" type="number" coerce="true" defvalue="0" group="data" description="The angle (in degrees) where the first slice will be located." onset="handleDataParamSet" />
+		<svidget:param name="sort" shortname="sort" type="string" subtype="choice" typedata="none|asc|desc" coerce="true" group="data" defvalue="none" description="Whether to sort the data. When true sorted by greatet to least value." onset="handleDataParamSet" />
+		<!-- style params -->
+		<svidget:param name="colors" shortname="c" type="array" coerce="true" group="appearance" description="An array of colors that correspond to each pie slice. If there are more slices than colors then colors will be reused." onset="handleDataParamSet" />
+		<svidget:param name="width" shortname="w" type="number" group="appearance" description="The width of the donut slice." onset="handleDataParamSet" />
+		<svidget:param name="labelStyle" shortname="lblstl" type="object" coerce="true" group="appearance" description="The style object for the label. Example { fontFamily: 'Arial', fontSize: '12px' }" onset="handleDataParamSet" />
+		<svidget:param name="labelType" shortname="lbltyp" type="string" subtype="choice" typedata="none|percentage|value|text" coerce="true" defvalue="percentage" group="appearance" description="The label value to display. Values are 'percentage', 'value', or 'text'. Default is text." onset="handleDataParamSet" />
+		<svidget:param name="innerLabelStyle" shortname="ilblstl" type="object" coerce="true" group="appearance" description="The style object for the label. Example { fontFamily: 'Arial', fontSize: '12px' }" onset="handleDataParamSet" />
+		<svidget:param name="innerLabelType" shortname="ilbltyp" type="string" subtype="choice" typedata="none|percentage|value|text" coerce="true" defvalue="text" group="appearance" description="The label value to display. Values are 'percentage', 'value', or 'text'. Default is text." onset="handleDataParamSet" />
+		<svidget:param name="popupStyle" shortname="popstl" type="object" coerce="true" group="appearance" description="The style object for the popup. Example { backgroundColor: '#dfdfdf', fontFamily: 'Arial', fontSize: '12px' }" onset="handlePopupParamSet" />
+		<svidget:param name="showPopup" shortname="sp" type="bool" coerce="true" defvalue="true" group="appearance" description="Whether to show the popup when hovering or clicking on donut slices." onset="handlePopupParamSet" />
+		<svidget:param name="showAnimation" shortname="sa" type="bool" coerce="true" defvalue="true" group="appearance" description="Whether to show animation." onset="handleUpdateParamSet" />
+	</svidget:params>
+
+	<svidget:actions>
+		<svidget:action name="animate" binding="animate" description="Animates the transition from 0-360 on the chart.">
+			<svidget:actionparam name="duration" type="number" defvalue="0.5" />
+		</svidget:action>
+	</svidget:actions>
+
+	<svidget:events>
+		<svidget:event name="sliceSelect" description="Triggered when a slice is selected either by mousing over or touching (on non-mouse devices)." />
+		<svidget:event name="sliceActivate" description="Triggered when a slice is activated due to a click or touch after slice was selected." />
+	</svidget:events>
+
+	<style>
+		<![CDATA[
+		a.footer { fill: #afafaf; }
+		.nonhover { opacity: 0.5; -webkit-transition: opacity 0.2s ease-in; transition: opacity 0.1s ease-in; }
+		.hover { cursor: pointer; opacity: 1.0; }
+		.unhover { opacity: 1.0; }
+		.popupbox { fill: #fff; border: 1px solid #3f3f3f; }
+		]]>
+	</style>
+
+	<defs>
+		<clipPath id="popupboxclip">
+			<rect x="0" y="0" width="120" height="50" stroke-width="2" />
+		</clipPath>
+	</defs>
+
+
+
+	<g id="test" transform="translate(-1000 -1000)">
+		<text id="testtext" font-size="15" font-family="Helvetica" x="0" y="0" />
+	</g>
+
+	<g id="chart" transform="translate(200 200)">
+		<g class="slice" transform="rotate(0)">
+			<path style="fill: #cf9f1f;" stroke="#fff" stroke-width="2" d="M 1.16341e-014 -190 A 190 190 0 0 1 158.384 -104.949 L 91.6963 -60.7601 A 110 110 0 0 0 6.73556e-015 -110 Z" />
+			<text style="font-family: Helvetica; font-size: 15px; fill: #fff; text-anchor: middle;" transform="translate(70.964 -132.152)" dy="0.35em">15.7%</text>
+		</g>
+		<g class="slice" transform="rotate(0)">
+			<path style="fill: #1f9f1f;" stroke="#fff" stroke-width="2" d="M 158.384 -104.949 A 190 190 0 0 1 119.116 148.025 L 68.9616 85.6989 A 110 110 0 0 0 91.6963 -60.7601 Z" />
+			<text style="font-family: Helvetica; font-size: 15px; fill: #fff; text-anchor: middle;" transform="translate(148.225 23.0087)" dy="0.35em">23.5%</text>
+		</g>
+		<g class="slice" transform="rotate(0)">
+			<path style="fill: #1f1fcf;" stroke="#fff" stroke-width="2" d="M 119.116 148.025 A 190 190 0 0 1 34.9124 186.765 L 20.2124 108.127 A 110 110 0 0 0 68.9616 85.6989 Z" />
+			<text style="font-family: Helvetica; font-size: 15px; fill: #fff; text-anchor: middle;" transform="translate(62.694 136.27)" dy="0.35em">7.8%</text>
+		</g>
+		<g class="slice" transform="rotate(0)">
+			<path style="fill: #9f1f9f;" stroke="#fff" stroke-width="2" d="M 34.9124 186.765 A 190 190 0 0 1 -144.287 -123.617 L -83.5345 -71.568 A 110 110 0 0 0 20.2124 108.127 Z" />
+			<text style="font-family: Helvetica; font-size: 15px; fill: #fff; text-anchor: middle;" transform="translate(-129.904 75)" dy="0.35em">39.2%</text>
+		</g>
+		<g class="slice" transform="rotate(0)">
+			<path style="fill: #cf1f1f;" stroke="#fff" stroke-width="2" d="M -144.287 -123.617 A 190 190 0 0 1 1.33851e-013 -190 L 7.7493e-014 -110 A 110 110 0 0 0 -83.5345 -71.568 Z" />
+			<text style="font-family: Helvetica; font-size: 15px; fill: #fff; text-anchor: middle;" transform="translate(-62.694 -136.27)" dy="0.35em">13.7%</text>
+		</g>
+	</g>
+
+	<g id="popupbox" clip-path="url(#popupboxclip)" transform="translate(0 0)" display="none">
+		<rect x="0" y="0" width="120" height="50" class="popupbox" stroke="#3f3f3f" stroke-width="2" />
+		<text id="popupboxlabel" font-weight="bold" stroke="none" stroke-width="0" text-anchor="start" x="5" y="20">Item</text>
+		<text id="popupboxvalue" stroke="none" stroke-width="0" text-anchor="start" x="5" y="40">0</text>
+	</g>
+
+	<script type="application/javascript" xlink:href="{{ asset('js/svidget.min.js') }}"></script>
+	<script type="application/javascript" xlink:href="{{ asset('js/d3.min.js') }}"></script>
+	<script type="application/javascript">
+
+		<![CDATA[
+
+		// constants
+		var DEFAULT_COLORS = ['#cf9f1f', '#1f9f1f', '#1f1fcf', '#9f1f9f', '#cf1f1f'];
+		var STYLE_MAPPINGS = { backgroundColor: "fill", borderColor: "stroke", borderWidth: "stroke-width", color: "fill", fontFamily: "font-family", fontSize: "font-size", fontWeight: "font-weight", fontStyle: "font-style", stroke: "stroke", strokeWidth: "stroke-width", strokeDashArray: "stroke-dasharray", textDecoration: "text-decoration" };
+		var EDGE = 10; // space between pie and edge
+		var SIZE = 400;
+		var FULL_RADIUS = SIZE / 2;
+		var CHART_RADIUS = FULL_RADIUS - EDGE;
+		var ANIMATION_DURATION = 500; //ms
+		var ANIMATION_EASING = "ease-in";
+
+		// param variables
+		var _data = [];
+		var _maxSlices = 3;
+		var _startAngle = 0;
+		var _sort = 'none';
+		var _colors = DEFAULT_COLORS;
+		var _width = 80;
+		var _labelStyle = null; //{ fontFamily: "Verdana", fontSize: "15px", color: "white", fontWeight: "bold" };
+		var _labelType = 'percentage';
+		var _innerLabelStyle = null;
+		var _innerLabelType = 'text';
+		var _popupStyle = null; //{ fontFamily: "Helvetica", backgroundColor: "#7fff7f", color: "red", fontSize: "15px", fontWeight: "normal", borderWidth: 0 };
+		var _showPopup = true;
+		var _showAnimation = true;
+
+		// general variables
+		var _loaded = false;
+		var _runAnimation = true;
+		var _arc = null;
+		var _textArc = null;
+		var _colorRange = null;
+		var _dataSum = 0;
+		var _selectedSliceIndex = null;
+
+		/* Loading */
+
+		// entry point
+		function init() {
+			//debugger;
+			console.log('init');
+			// for demo purposes only, in case no data is passed
+			_data = [['banana', 4], ['apple', 6], ['cherry', 2], ['orange', 10], ['grape', 3.5]];
+			initParams();
+			initEvents();
+
+			drawIfStandalone();
+			_loaded = true;
+		}
+
+		function initParams() {
+			loadParams();
+		}
+
+		function initEvents() {
+			var surface = d3.select(document.documentElement);
+			surface.on("click", handleSurfaceClick);
+			var widget = svidget.$;
+			widget.onpagepopulate(handlePagePopulate);
+		}
+
+		function drawIfStandalone() {
+			// this is temp hack to give chance for page to pass params, if no page then we are in standalone mode
+			d3.select("#chart").selectAll().remove();
+			window.setTimeout(function () {
+				if (svidget.$.populatedFromPage()) return;
+				draw();
+			}, 100);
+		}
+
+		window.addEventListener('load', init, false);
+
+
+		/* Param Events */
+
+		function loadParams() {
+			var widget = svidget.$;
+			_data = checkNull(widget.param("data").value(), _data);
+			_maxSlices = checkNull(widget.param("maxSlices").value(), _maxSlices);
+			_startAngle = checkNull(widget.param("startAngle").value(), _startAngle);
+			_sort = checkNull(widget.param("sort").value(), _sort);
+			_colors = checkNull(widget.param("colors").value(), _colors);
+			_width = checkNull(widget.param("width").value(), _width);
+			_labelStyle = checkNull(widget.param("labelStyle").value(), _labelStyle);
+			_labelType = checkNull(widget.param("labelType").value(), _labelType);
+			_innerLabelStyle = checkNull(widget.param("innerLabelStyle").value(), _innerLabelStyle);
+			_innerLabelType = checkNull(widget.param("innerLabelType").value(), _innerLabelType);
+			_popupStyle = checkNull(widget.param("popupStyle").value(), _popupStyle);
+			_showPopup = checkNull(widget.param("showPopup").value(), _showPopup);
+			_showAnimation = checkNull(widget.param("showAnimation").value(), _showAnimation);
+		}
+
+		// this handler is invoked once the params from page are passed to widget and populated onto params
+		function handlePagePopulate(e) {
+			loadParams();
+			draw();
+		}
+
+		function handleUpdateParamSet(e) {
+			if (!_loaded) return;
+			//console.log('handleUpdateParamSet');
+			var widget = svidget.$;
+			if (widget.connected() && !widget.populatedFromPage()) return; // not all params have been populated, so defer until loadParams() is called
+			//console.log('populated from page: ' + widget.populatedFromPage());
+			_runAnimation = _runAnimation || e.target.name() == "data";
+			loadParams();
+		}
+
+		// this handler is invoked when these params are set: data, maxSlices, startAngle, sort, fontSize, fontName, labelType
+		function handleDataParamSet(e) {
+			if (!_loaded) return;
+			//console.log('handleDataParamSet');
+			var widget = svidget.$;
+			if (widget.connected() && !widget.populatedFromPage()) return; // not all params have been populated, so defer until loadParams() is called
+			handleUpdateParamSet(e);
+			drawChart();
+		}
+
+		// this handler is invoked when the showPopup params is set
+		function handlePopupParamSet(e) {
+			if (!_loaded) return;
+			//console.log('handlePopupParamSet');
+			var widget = svidget.$;
+			if (widget.connected() && !widget.populatedFromPage()) return; // not all params have been populated, so defer until loadParams() is called
+			_showPopup = widget.param("showPopup").value();
+			if (!_showPopup) hidePopup(); // just in case
+			drawPopup();
+		}
+
+
+		/* UI Events */
+
+		function handleSliceOver(d, i) {
+			//debugger;
+			var de = d3.event;
+			var chart = d3.select("#chart");
+			var slice = d3.select(this);
+			var slices = chart.selectAll(".slice");
+			// clear previous hovers
+			slices.classed("hover", false).classed("nonhover", true);
+			// add hover to current slice
+			slice.classed("nonhover", false).classed("hover", true);
+
+			if (_showPopup) showPopup(d);
+			if (_selectedSliceIndex != i) de.preventDefault(); // in case of touchstart, prevents "click" from firing (needs test)
+			_selectedSliceIndex = i;
+
+			// trigger svidget event
+			var eventVal = toEventValue(d.data, _dataSum);
+			svidget.$.event("sliceSelect").trigger(eventVal);
+		}
+
+		function handleSliceOut(d, i) {
+			var de = d3.event;
+			var chart = d3.select("#chart");
+			var slices = chart.selectAll(".slice");
+			// clear all hovers
+			slices.classed("hover", false).classed("nonhover", false);
+
+			hidePopup();
+			_selectedSliceIndex = null;
+		}
+
+		function handleSliceClick(d, i) {
+			var de = d3.event;
+			_selectedSliceIndex = i;
+			// trigger svidget event
+			var eventVal = toEventValue(d.data, _dataSum);
+			svidget.$.event("sliceActivate").trigger(eventVal);
+
+			de.stopPropagation();
+		}
+
+		function handleSurfaceClick(d, i) {
+			handleSliceOut(d, i);
+		}
+
+
+		/* Popup */
+
+		function showPopup(d) {
+			var data = d.data;
+			var valueStr = toPctString(data[1], _dataSum) + " (" + data[1] + ")";
+			var angle = toDegrees((d.endAngle + d.startAngle) / 2);
+			d3.select("#popupboxlabel").text(data[0]);
+			d3.select("#popupboxvalue").text(valueStr);
+			var box = d3.select("#popupbox");
+			var point = getCornerPosition(box, angle);
+			box.attr("transform", translate(point.x, point.y));
+			setVisible(box, true);
+		}
+
+		function hidePopup() {
+			var box = d3.select("#popupbox");
+			setVisible(box, false);
+		}
+
+		function getCornerPosition(box, angle) {
+			var rect = box.select("rect").node();
+			var w = rect.width.baseVal.value;
+			var h = rect.height.baseVal.value;
+			var x = 0;
+			var y = 0;
+			angle = angle % 360;
+			if (angle <= 90)
+				x = SIZE - w;
+			else if (angle <= 180) {
+				x = SIZE - w;
+				y = SIZE - h;
+			}
+			else if (angle <= 270)
+				y = SIZE - h;
+			return { x: x, y: y };
+		}
+
+
+		/* Action Handlers */
+
+		function animate(e) {
+			_runAnimation = true;
+			reanimate();
+		}
+
+
+		/* Draw */
+
+		function draw() {
+			drawChart();
+			drawPopup();
+		}
+
+		function reanimate() {
+			var chart = d3.select("#chart");
+			var slices = chart.selectAll(".slice");
+			startAnimation(slices, _arc, _textArc);
+		}
+
+		function drawChart() {
+			// see: http://bl.ocks.org/mbostock/3887193
+			// also: http://datavizcatalogue.com/methods/donut_chart.html
+			// debugger;
+			var TEXT_RADIUS_RATIO = 0.6; // this is the ratio from the donut inner radius to center, to use for the text inside the donut
+			var TEXT_MIN_RADIUS = 50;
+			var outerRadius = CHART_RADIUS;
+			var innerRadius = outerRadius - _width;
+			var textInnerRadius = Math.min(innerRadius * TEXT_RADIUS_RATIO, innerRadius - TEXT_MIN_RADIUS);
+			var data = maxifyData(_data, _maxSlices);
+
+			// colors
+			_colorRange = d3.scale.ordinal().range(_colors);
+
+			// pie layout - for layout out arcs as a pie/donut chart
+			var pie = d3.layout.pie()
+				.startAngle(toRadians(_startAngle))
+				.endAngle(toRadians(_startAngle + 360))
+				.sort(sortDataFunc(_sort))
+				.value(function(d) {
+					return numIt(d[1]); /* second element in data inner array */
+				});
+
+			// the main arc object
+			_arc = d3.svg.arc()
+				.outerRadius(outerRadius)
+				.innerRadius(innerRadius);
+			// the text arc object - for placing text inside of the donut
+			_textArc = d3.svg.arc()
+				.outerRadius(innerRadius)
+				.innerRadius(textInnerRadius);
+
+			// create chart and slices
+			var chart = d3.select("#chart");
+			chart.selectAll(".slice").remove(); // removes previous arcs
+			var slices = chart.selectAll(".slice")
+				//.remove()
+				.data(pie(data))
+				.enter()
+				.append("g");
+			slices.attr("class", "slice hover");
+			//g.attr("transform", translate(FULL_RADIUS, FULL_RADIUS));
+			var paths = slices.append("path");
+			// sum data for percentages
+			_dataSum = getDataSum(data);
+
+			// draw slices
+			drawSlices(slices, paths, _arc, _colorRange);
+			// draw labels
+			drawLabels(slices, _arc, _textArc);
+			// wire events
+			wireEvents(slices);
+			// animate
+			startAnimation(slices, _arc, _textArc);
+		}
+
+		function drawSlices(slices, paths, arc, colorRange) {
+			paths.attr("stroke", "#fff")
+				.attr("stroke-width", 2)
+				.attr("d", arc)
+				.style("fill", function(d, i) {
+					return colorRange(i);
+				});
+		}
+
+		function drawLabels(slices, arc, textArc) {
+			//debugger;
+			// draw labels on arcs
+			drawArcLabels(slices, arc, _labelType, copyObject(_labelStyle, getDefaultLabelStyle()), _dataSum);
+			// draw labels in donut
+			drawArcLabels(slices, textArc, _innerLabelType, copyObject(_innerLabelStyle, getDefaultInnerLabelStyle()), _dataSum);
+		}
+
+		function drawArcLabels(slices, arc, labelType, labelStyle, dataSum) {
+			if (labelType == "none") return;
+			slices.append("text")
+				.attr("dy", ".35em")
+				.attr("style", "")
+				.style("text-anchor", "middle")
+				.style(toSvgStyleObject(labelStyle))
+				.attr("transform", function(d) {
+					//console.log('arc centroid: ' + arc.centroid(d));
+					return "translate(" + arc.centroid(d) + ")";
+				})
+				.text(function(d) {
+					//console.log(d.data[0]);
+					return getLabelString(d.data, labelType, dataSum);
+				});
+		}
+
+		function drawPopup() {
+			//if (_popupStyle == null) return;
+			var popupStyle = copyObject(_popupStyle, getDefaultPopupStyle());
+			var styleObjs = separatePopupStyleObject(popupStyle);
+			var popup = d3.select("#popupbox");
+			// rect
+			var rectStyle = toSvgStyleObject(styleObjs.rectStyle);
+			var rect = popup.select("rect");
+			rect.style(rectStyle);
+			// text elements
+			var textStyle = toSvgStyleObject(styleObjs.textStyle);
+			var texts = popup.selectAll("text");
+			texts.style(textStyle);
+		}
+
+		function wireEvents(slices) {
+			//slices.data("index", slice.index);
+			slices.on("mouseover", handleSliceOver);
+			slices.on("touchstart", handleSliceOver); // for touch devices
+			slices.on("mouseout", handleSliceOut);
+			slices.on("click", handleSliceClick);
+		}
+
+		function startAnimation(slices, arc, textArc) {
+			if (!_runAnimation || !_showAnimation) return;
+			// console.log("starting animation");
+			// move all slices to starting position
+			slices.attr("transform", function(d) {
+				var rotate = "rotate(-" + toDegrees(arc.startAngle()(d)) + ")";
+				//console.log(rotate);
+				return rotate;
+			});
+			slices.transition()
+				.duration(ANIMATION_DURATION)
+				.ease(ANIMATION_EASING)
+				//.each("end", doneFunc) // we may need this later
+				.attrTween("transform", tween);
+
+			// tween function: rotates from start angle to its current angle position
+			function tween(d, i, a) {
+				var startRotate = "rotate(-" + toDegrees(arc.startAngle()(d)) + ")";
+				var endRotate = "rotate(0)";
+				return d3.interpolateString(startRotate, endRotate);
+			}
+
+			_runAnimation = false; // only run once unless invoked again by action
+		}
+
+
+		/* Data Helpers */
+
+		function sortDataFunc(sort) {
+			if (sort == null || sort == "none") return null;
+			debugger;
+			var asc = (sort == "asc");
+			// a compare function to sort data in desc order by value
+			function dataComparator(a, b) {
+				var neg = asc ? 1 : -1;
+				return (a[1] - b[1]) * neg; //sort descending by value (index 1 in subarray)
+			}
+			return dataComparator;
+		}
+
+		function getDefaultLabelStyle() {
+			return { fontFamily: "Helvetica", fontSize: "15px", color: "#fff" };
+		}
+
+		function getDefaultInnerLabelStyle() {
+			return { fontFamily: "Helvetica", fontSize: "15px", color: "#3f3f3f" };
+		}
+
+		function getDefaultPopupStyle() {
+			return { fontFamily: "Helvetica", fontSize: "15px", color: "#3f3f3f" };
+		}
+
+		// gets label string: either text, value, or percentage
+		function getLabelString(item, type, sum) {
+			// item = ['label', value]
+			// percentage|value|text
+			type = type || _labelType;
+			if (item == null || !item.length || item.length < 2) return "";
+			if (type == "value")
+				return item[1] + '';
+			else if (type == "text")
+				return item[0];
+			else
+				return toPctString(item[1], sum);
+		}
+
+		// returns { rectStyle: {...}, textStyle: {...} }
+		function separatePopupStyleObject(styleObj) {
+			// segment for rect vs group vs text objs
+			// { backgroundColor: "fill", borderColor: "stroke", borderWidth: "stroke-width", color: "fill", fontFamily: "font-family", fontSize: "font-size", fontWeight: "font-weight", fontStyle: "font-style", stroke: "stroke", strokeWidth: "stroke-width", strokeDashArray: "stroke-dasharray", textDecoration: "text-decoration" };
+			var rectObj = {};
+			var textObj = {};
+			for (var key in styleObj) {
+				if (key.indexOf("background") == 0 || key.indexOf("border") == 0 || key.indexOf("stroke") == 0)
+					rectObj[key] = styleObj[key];
+				else
+					textObj[key] = styleObj[key];
+			}
+			return { rectStyle: rectObj, textStyle: textObj };
+		}
+
+		function getDataSum(data) {
+			var sum = 0;
+			for (var i=0; i<data.length; i++) {
+				sum += numIt(data[i][1]);
+			}
+			return sum;
+		}
+
+		function maxifyData(data, max) {
+			//debugger;
+			if (max == null || max <= 0 || max >= data.length) return data;
+			var newdata = [];
+			var count = 0;
+			var restsum = 0;
+			while (count < data.length) {
+				if (count >= max - 1) {
+					restsum += numIt(data[count][1]);
+				}
+				else {
+					newdata.push(data[count]);
+				}
+				count++;
+			}
+			if (restsum > 0) newdata.push(["Other", restsum]);
+
+			return newdata;
+		}
+
+
+		/* Misc */
+
+		function checkNull(item, backupItem) {
+			return item != null ? item : backupItem;
+		}
+
+		function numIt(val) {
+			return nantoZero(parseFloat(val));
+		}
+
+		function nantoZero(val) {
+			return isNaN(val) ? 0 : val;
+		}
+
+		function setVisible(ele, visible) {
+			var d = visible ? "" : "none";
+			ele.attr("display", d);
+		}
+
+		function translate(x, y) {
+			return "translate(" + x + " " + y + ")";
+		}
+
+		function toSvgStyleObject(styleObj) {
+			var snapObj = {};
+			for (var key in styleObj) {
+				var snapKey = STYLE_MAPPINGS[key];
+				if (snapKey !== undefined) {
+					snapObj[snapKey] = styleObj[key];
+				}
+			}
+			return snapObj;
+		}
+
+		function copyObject(source, target) {
+			if (source == null) return target;
+			target = target || {};
+			for (var key in source) {
+				target[key] = source[key];
+			}
+			return target;
+		}
+
+		function toEventValue(data, ratio) {
+			return { name: data[0], value: data[1], ratio: ratio };
+		}
+
+		function toPctString(value, sum) {
+			value = numIt(value);
+			var ratio = sum != 0 ? value / sum : 0;
+			return (Math.round(ratio * 1000) / 10.0) + "%";
+		}
+
+		function toRadians(deg) {
+			return (deg / 360) * Math.PI * 2;
+		}
+
+		function toDegrees(rad) {
+			return (rad * 360) / (Math.PI * 2);
+		}
+
+	  ]]>
+	</script>
+</svg>

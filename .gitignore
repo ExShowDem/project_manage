@@ -1,0 +1,26 @@
+/node_modules
+# /public/hot
+# /public/storage
+# /public/assets
+# /public/js
+# /public/css
+# /public/fonts
+# /public/mix-manifest.json
+/public/upload
+# /storage/*.key
+/vendor
+# /resources/assets/admin/images/media
+.env
+.env.testing
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.idea
+_ide_helper.php
+_ide_helper_models.php
+.DS_Store
+# .package-lock.json
+
+storage/public
