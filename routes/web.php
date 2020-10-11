@@ -1,6 +1,6 @@
 <?php
 
-Route::redirect('/', '/login');
+Route::redirect('/', env('APP_URL').'login');
 
 /*
 If you are already logged out, then you visit /logout again, 
